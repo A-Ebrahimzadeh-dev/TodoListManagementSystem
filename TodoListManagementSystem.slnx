@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TodoListManagementSystem.Application/TodoListManagementSystem.Application.csproj" />
+  <Project Path="TodoListManagementSystem.Domain/TodoListManagementSystem.Domain.csproj" />
+  <Project Path="TodoListManagementSystem.Infrastructure.Persistence/TodoListManagementSystem.Infrastructure.Persistence.csproj" />
+  <Project Path="TodoListManagementSystem.Shared/TodoListManagementSystem.Shared.csproj" />
+    <Project Path="TodoListManagementSystem.RESTFulApi/TodoListManagementSystem.RESTFulApi.csproj" />
+</Solution>
