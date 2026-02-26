@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TodoListManagementSystem.Application.Usecases.TodoList.Commads.UpdateTodoList
+namespace TodoListManagementSystem.Application.Usecases.TodoList.Commands.UpdateTodoList
 {
     public class UpdateTodoListValidator : AbstractValidator<UpdateTodoListCommand>
     {

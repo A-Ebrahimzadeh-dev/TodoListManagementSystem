@@ -2,7 +2,7 @@
 using TodoListManagementSystem.Domain.Entities;
 using TodoListManagementSystem.Infrastructure.Persistence.Abstractions.Data.FileSystem;
 
-namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem.Repositories
+namespace TodoListManagementSystem.Infrastructure.Persistence.Data.Repositories
 {
     public sealed class UserRepository(
         IJsonFileStore store,
@@ -11,18 +11,16 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem.Re
         private readonly IJsonFileStore _store = store;
         private readonly IPathProvider _paths = paths;
 
-        public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
+        public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct)
         {
-            var path = _paths.GetUserFilePath(id);
+            var path = _paths.GetUserFilePath(userId);
             return await _store.ReadAsync<User>(path, ct);
         }
 
         public async Task<User?> GetByUsernameAsync(string username, CancellationToken ct)
         {
-            var users = await _store.ReadAllFromDirectoryAsync<User>(_paths.UsersDirectory, ct);
-
-            return users.FirstOrDefault(u =>
-                string.Equals(u.Username?.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
+            var users = await _store.ReadAllFromDirectoryAsync<User>(_paths.UsersRoot, ct);
+            return users.FirstOrDefault(u => string.Equals(u.Username?.Trim(), username.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<User> SaveAsync(User user, CancellationToken ct)
@@ -32,5 +30,4 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem.Re
             return user;
         }
     }
-
 }

@@ -4,7 +4,7 @@ using TodoListManagementSystem.Domain.Exceptions;
 
 namespace TodoListManagementSystem.Domain.Entities
 {
-    public class TodoList : IEntity
+    public sealed class TodoList : IEntity
     {
         [JsonConstructor]
         public TodoList(

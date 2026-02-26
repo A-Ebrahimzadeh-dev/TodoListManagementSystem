@@ -3,14 +3,14 @@
     public interface IPathProvider
     {
         string RootPath { get; }
-
-        string UsersDirectory { get; }
-        string TaskItemsDirectory { get; }
-        string TodoListsDirectory { get; }
+        string UsersRoot { get; }
+        string TodoListsRoot { get; }
+        string TaskItemsRoot { get; }
 
         string GetUserFilePath(Guid userId);
-        string GetTaskItemFilePath(Guid taskId);
-        string GetTodoListFilePath(Guid todoListId);
+        string GetUserTodoListsDirectory(Guid userId);
+        string GetTodoListFilePath(Guid userId, Guid todoListId);
+        string GetTaskItemsDirectory(Guid userId, Guid todoListId);
+        string GetTaskItemFilePath(Guid userId, Guid todoListId, Guid taskItemId);
     }
-
 }

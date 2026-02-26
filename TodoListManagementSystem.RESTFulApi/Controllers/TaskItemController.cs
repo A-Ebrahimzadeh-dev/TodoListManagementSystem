@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using TodoListManagementSystem.Application.DTOs.TaskItem;
 using TodoListManagementSystem.Application.Usecases.TaskItem.Queries.GetTaskItemById;
-using TodoListManagementSystem.RESTFulApi.Extensions.Mappers.TaskItem;
+using TodoListManagementSystem.RESTFulApi.Extensions.Mappers;
 using TodoListManagementSystem.RESTFulApi.Models.Request.TaskItem;
 
 namespace TodoListManagementSystem.RESTFulApi.Controllers
@@ -15,7 +15,7 @@ namespace TodoListManagementSystem.RESTFulApi.Controllers
         private readonly IMediator _mediator = mediator;
 
         [HttpGet("{taskItemId:Guid}")]
-        public async Task<ActionResult<TaskItemDto>> GetTaskItemById(Guid taskItemId)
+        public async Task<ActionResult<TaskItemDto>> GetTaskItemById([FromQuery] Guid todoListId, Guid taskItemId)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
             if (userIdClaim == null)
@@ -23,10 +23,11 @@ namespace TodoListManagementSystem.RESTFulApi.Controllers
 
             var userId = Guid.Parse(userIdClaim.Value);
 
-            var results = await _mediator.Send(new GetTaskItemByIdQuery(userId, taskItemId));
+            var results = await _mediator.Send(new GetTaskItemByIdQuery(userId, todoListId, taskItemId));
 
             return Ok(results);
         }
+
         [HttpPost]
         public async Task<ActionResult> CreateNewTaskItem([FromBody] CreateTaskItemRequest request)
         {

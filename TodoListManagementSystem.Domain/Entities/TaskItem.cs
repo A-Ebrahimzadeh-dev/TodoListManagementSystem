@@ -4,7 +4,7 @@ using TodoListManagementSystem.Domain.Exceptions;
 
 namespace TodoListManagementSystem.Domain.Entities
 {
-    public class TaskItem : IEntity
+    public sealed class TaskItem : IEntity
     {
         [JsonConstructor]
         public TaskItem(
@@ -12,19 +12,19 @@ namespace TodoListManagementSystem.Domain.Entities
             Guid todoListId,
             string title,
             string? description,
-            PriorityLevel priorityLevel,
+            PriorityLevel priority,
             Status status,
             DateTime? dueDate,
             List<string>? tags,
             DateTime createdDate,
             DateTime lastModifiedDate,
-            DateTime completedDate)
+            DateTime? completedDate)
         {
             Id = id;
             TodoListId = todoListId;
             Title = title;
             Description = description;
-            Priority = priorityLevel;
+            Priority = priority;
             Status = status;
             DueDate = dueDate;
             Tags = tags;
@@ -47,7 +47,7 @@ namespace TodoListManagementSystem.Domain.Entities
             Priority = priorityLevel;
             Status = status;
             DueDate = dueDate;
-            Tags = tags;
+            Tags = tags ?? [];
             CreatedDate = DateTime.UtcNow;
             LastModifiedDate = DateTime.UtcNow;
         }
@@ -88,24 +88,18 @@ namespace TodoListManagementSystem.Domain.Entities
         }
 
         public void UpdateLastModifiedDate() => LastModifiedDate = DateTime.UtcNow;
-
-        public void UpdateTagsList(List<string>? tags)
+        
+        public void ReplaceTags(IEnumerable<string>? tags)
         {
-            var currentTags = this.Tags ?? [];
-            var newTags = tags ?? [];
+            var normalizedTags = tags?
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim())
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
 
-            var tagsToAdd = newTags.Except(currentTags, StringComparer.Ordinal).ToList();
-            var tagsToRemove = currentTags.Except(newTags, StringComparer.Ordinal).ToList();
-
-            foreach (var tag in tagsToRemove)
-            {
-                this.DeleteTag(tag);
-            }
-
-            foreach (var tag in tagsToAdd)
-            {
-                this.AddTag(tag);
-            }
+            Tags = normalizedTags is { Count: > 0 }
+                ? normalizedTags
+                : null;
         }
 
         public void UpdateContent(string title,
@@ -121,35 +115,9 @@ namespace TodoListManagementSystem.Domain.Entities
             Description = description;
             Priority = priorityLevel;
             DueDate = dueDate;
-            UpdateTagsList(tags);
+            ReplaceTags(tags);
             ChangeStatus(status);
         }
-
-        private void AddTag(string tag)
-        {
-            if (string.IsNullOrWhiteSpace(tag))
-                throw new ArgumentNullOrEmptyException("Tag must have a value");
-
-            string? existingTag = FindSpecificTag(tag);
-            if (existingTag is not null)
-                throw new DuplicateValueException($"Tag with value [{tag}] already exist");
-
-            Tags?.Add(existingTag!);
-        }
-
-        private void DeleteTag(string tag)
-        {
-            if (string.IsNullOrWhiteSpace(tag))
-                throw new ArgumentNullOrEmptyException("Tag must have a value");
-
-            string? existingTag = FindSpecificTag(tag)
-                ?? throw new ValueNotFoundException($"Tags list doesn't have tag with value [{tag}]");
-
-            Tags?.Remove(existingTag);
-        }
-
-        private string? FindSpecificTag(string tag)
-            => Tags?.FirstOrDefault(t => t.Equals(tag, StringComparison.Ordinal));
     }
 
     public enum PriorityLevel

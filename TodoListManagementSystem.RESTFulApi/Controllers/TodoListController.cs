@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using TodoListManagementSystem.Application.DTOs.TaskItem;
 using TodoListManagementSystem.Application.DTOs.TodoList;
-using TodoListManagementSystem.Application.Usecases.TodoList.Commads.DeleteTodoList;
+using TodoListManagementSystem.Application.Usecases.TodoList.Commands.DeleteTodoList;
 using TodoListManagementSystem.Application.Usecases.TodoList.Queries.GetMyTodoLists;
 using TodoListManagementSystem.Application.Usecases.TodoList.Queries.GetMyTodoListTaskItems;
 using TodoListManagementSystem.Application.Usecases.TodoList.Queries.GetTodoListById;
-using TodoListManagementSystem.RESTFulApi.Extensions.Mappers.TodoList;
+using TodoListManagementSystem.RESTFulApi.Extensions.Mappers;
 using TodoListManagementSystem.RESTFulApi.Models.Request.TodoList;
 
 namespace TodoListManagementSystem.RESTFulApi.Controllers
@@ -18,7 +18,7 @@ namespace TodoListManagementSystem.RESTFulApi.Controllers
     {
         private readonly IMediator _mediator = mediator;
 
-        [HttpGet]
+        [HttpGet("My")]
         public async Task<ActionResult<IReadOnlyCollection<TodoListDto>>> GetMyTodoLists()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
@@ -28,20 +28,6 @@ namespace TodoListManagementSystem.RESTFulApi.Controllers
             var userId = Guid.Parse(userIdClaim.Value);
 
             var results = await _mediator.Send(new GetMyTodoListTaskItemsQuery(userId));
-
-            return Ok(results);
-        }
-
-        [HttpGet("{todoListId:Guid}/TaskItems")]
-        public async Task<ActionResult<IReadOnlyCollection<TaskItemDto>>> GetMyTodoListTaskItems(Guid todoListId)
-        {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
-            if (userIdClaim == null)
-                return Unauthorized();
-
-            var userId = Guid.Parse(userIdClaim.Value);
-
-            var results = await _mediator.Send(new GetMyTodoListsTaskItemsQuery(userId, todoListId));
 
             return Ok(results);
         }
@@ -56,6 +42,20 @@ namespace TodoListManagementSystem.RESTFulApi.Controllers
             var userId = Guid.Parse(userIdClaim.Value);
 
             var results = await _mediator.Send(new GetTodoListByIdQuery(todoListId, userId));
+
+            return Ok(results);
+        }
+
+        [HttpGet("{todoListId:Guid}/TaskItems")]
+        public async Task<ActionResult<IReadOnlyCollection<TaskItemDto>>> GetMyTodoListTaskItems(Guid todoListId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = Guid.Parse(userIdClaim.Value);
+
+            var results = await _mediator.Send(new GetMyTodoListsTaskItemsQuery(userId, todoListId));
 
             return Ok(results);
         }
