@@ -12,10 +12,8 @@ namespace TodoListManagementSystem.Application.Usecases.TodoList.Queries.GetTodo
 
         public async Task<TodoListDto> Handle(GetTodoListByIdQuery request, CancellationToken cancellationToken)
         {
-            var existingTodoList = await _todoListRepository.GetByIdAsync(request.TodoListId, cancellationToken)
-                ?? throw new SourceNotFoundException($"Tood list with id [{request.TodoListId}] not found");
-            if (existingTodoList.Creator != request.UserId)
-                throw new AccessDeniedException($"User [{request.UserId}] not have permission to read this todo list.");
+            var existingTodoList = await _todoListRepository.GetByIdAsync(request.UserId, request.TodoListId, cancellationToken)
+                ?? throw new SourceNotFoundException($"Todo list with id [{request.TodoListId}] not found");
 
             return existingTodoList.MapToTodoListDto();
         }

@@ -8,18 +8,10 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {
-            var directories = new[]
-            {
-                _pathProvider.RootPath,
-                _pathProvider.UsersDirectory,
-                _pathProvider.TaskItemsDirectory,
-                _pathProvider.TodoListsDirectory
-            };
-
-            foreach (var dir in directories)
-            {
-                Directory.CreateDirectory(dir);
-            }
+            Directory.CreateDirectory(_pathProvider.RootPath);
+            Directory.CreateDirectory(_pathProvider.UsersRoot);
+            Directory.CreateDirectory(_pathProvider.TodoListsRoot);
+            Directory.CreateDirectory(_pathProvider.TaskItemsRoot);
 
             await Task.CompletedTask;
         }

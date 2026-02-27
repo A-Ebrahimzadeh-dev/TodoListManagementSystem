@@ -7,46 +7,47 @@ namespace TodoListManagementSystem.RESTFulApi.DependencyInjection
 {
     public static class AuthenticationExtensions
     {
-        public static IServiceCollection AddAuthenticationServices(
-            this IServiceCollection services,
-            IConfiguration configuration)
+        extension(IServiceCollection services)
         {
-            var jwtSettings = new JwtSettings();
-            configuration.GetSection("AppSettings:Jwt").Bind(jwtSettings);
-
-            var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
-
-            services.AddAuthentication(options =>
+            public IServiceCollection AddAuthenticationServices(IConfiguration configuration)
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = true;
-                options.SaveToken = true;
-                options.MapInboundClaims = false;
+                var jwtSettings = new JwtSettings();
+                configuration.GetSection("AppSettings:Jwt").Bind(jwtSettings);
 
-                options.TokenValidationParameters = new TokenValidationParameters
+                var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+
+                services.AddAuthentication(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtSettings.Issuer,
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = true;
+                    options.SaveToken = true;
+                    options.MapInboundClaims = false;
 
-                    ValidateAudience = true,
-                    ValidAudience = jwtSettings.Audience,
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtSettings.Issuer,
 
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero,
+                        ValidateAudience = true,
+                        ValidAudience = jwtSettings.Audience,
 
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
 
-                    RequireExpirationTime = true,
-                    RequireSignedTokens = true
-                };
-            });
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
 
-            return services;
+                        RequireExpirationTime = true,
+                        RequireSignedTokens = true
+                    };
+                });
+
+                return services;
+            }
         }
     }
 }

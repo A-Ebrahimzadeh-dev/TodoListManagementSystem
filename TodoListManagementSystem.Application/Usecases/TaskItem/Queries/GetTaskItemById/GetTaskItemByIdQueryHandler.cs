@@ -6,21 +6,14 @@ using TodoListManagementSystem.Domain.Abstractions.Repositories;
 
 namespace TodoListManagementSystem.Application.Usecases.TaskItem.Queries.GetTaskItemById
 {
-    public class GetTaskItemByIdQueryHandler(ITaskItemRepository taskItemRepository, ITodoListRepository todoListRepository) : IRequestHandler<GetTaskItemByIdQuery, TaskItemDto>
+    public class GetTaskItemByIdQueryHandler(ITaskItemRepository taskItemRepository) : IRequestHandler<GetTaskItemByIdQuery, TaskItemDto>
     {
         private readonly ITaskItemRepository _taskItemRepository = taskItemRepository;
-        private readonly ITodoListRepository _todoListRepository = todoListRepository;
 
         public async Task<TaskItemDto> Handle(GetTaskItemByIdQuery request, CancellationToken cancellationToken)
         {
-            var existingTaskItem = await _taskItemRepository.GetByIdAsync(request.TaskItemId, cancellationToken)
-                ?? throw new SourceNotFoundException($"Task item with id [{request.TaskItemId}] not found");
-
-            var existingTodoList = await _todoListRepository.GetByIdAsync(existingTaskItem.TodoListId, cancellationToken)
-                ?? throw new InternalServerException("This task is currently unavailable.\r\n");
-
-            if (existingTodoList.Creator != request.UserId)
-                throw new AccessDeniedException($"User [{request.UserId}] not have permission to read this task item [{request.TaskItemId}].");
+            var existingTaskItem = await _taskItemRepository.GetByIdAsync(request.UserId, request.TodoListId, request.TaskItemId, cancellationToken)
+                ?? throw new SourceNotFoundException($"Task item with ID [{request.TaskItemId}] not found for user [{request.UserId}] in TodoList [{request.TodoListId}].");
 
             return existingTaskItem.MapToTaskItemDto();
         }

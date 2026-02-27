@@ -2,10 +2,13 @@
 {
     public static class AuthorizationExtention
     {
-        public static IServiceCollection AddAuthorizationServices(this IServiceCollection services) 
+        extension(IServiceCollection services)
         {
-            services.AddAuthorization();
-            return services;
+            public IServiceCollection AddAuthorizationServices()
+            {
+                services.AddAuthorization();
+                return services;
+            }
         }
     }
 }

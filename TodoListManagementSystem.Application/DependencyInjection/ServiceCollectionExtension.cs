@@ -6,11 +6,14 @@ namespace TodoListManagementSystem.Application.DependencyInjection
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        extension(IServiceCollection services)
         {
-            services.AddSingleton<IHashManager, HashManager>();
+            public IServiceCollection AddApplicationServices()
+            {
+                services.AddSingleton<IHashManager, HashManager>();
 
-            return services;
+                return services;
+            }
         }
     }
 }

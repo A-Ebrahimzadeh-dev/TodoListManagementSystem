@@ -16,6 +16,7 @@ namespace TodoListManagementSystem.Application.Usecases.Auth.Commands.SignUp
         public async Task<Guid> Handle(SignUpCommand command, CancellationToken cancellationToken)
         {
             var existingUser = await _userRepository.GetByUsernameAsync(command.Username, cancellationToken);
+
             if (existingUser != null)
                 throw new SourceAlreadyExistsException($"Username '{command.Username}' is already taken.");
 

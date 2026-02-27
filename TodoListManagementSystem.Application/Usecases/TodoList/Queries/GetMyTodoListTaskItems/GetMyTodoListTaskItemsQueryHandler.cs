@@ -13,13 +13,14 @@ namespace TodoListManagementSystem.Application.Usecases.TodoList.Queries.GetMyTo
 
         public async Task<IReadOnlyCollection<TaskItemDto>> Handle(GetMyTodoListsTaskItemsQuery request, CancellationToken cancellationToken)
         {
-            var existingTodolist = await _todoListRepository.GetByIdAsync(request.TodoListId, cancellationToken)
-                ?? throw new SourceNotFoundException($"Todo list [{request.TodoListId}] not found");
+            var todoListExists = await _todoListRepository
+                .ExistsAsync(request.UserId, request.TodoListId, cancellationToken);
 
-            if (existingTodolist.Creator != request.UserId)
-                throw new AccessDeniedException($"User [{request.UserId}] not have permission to read this todo list [{request.TodoListId}].");
+            if (!todoListExists)
+                throw new SourceNotFoundException($"Todo list with id {request.TodoListId} not found for user {request.UserId}.");
 
-            var taskItems = await _taskItemRepository.GetByTodoListIdAsync(request.TodoListId, cancellationToken);
+            var taskItems = await _taskItemRepository
+                .GetByTodoListIdAsync(request.UserId, request.TodoListId, cancellationToken);
 
             return [.. taskItems.Select(t => t.MapToTaskItemDto())];
         }

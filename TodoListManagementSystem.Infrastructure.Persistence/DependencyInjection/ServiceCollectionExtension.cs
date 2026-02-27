@@ -2,25 +2,28 @@
 using TodoListManagementSystem.Domain.Abstractions.Repositories;
 using TodoListManagementSystem.Infrastructure.Persistence.Abstractions.Data.FileSystem;
 using TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem;
-using TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem.Repositories;
+using TodoListManagementSystem.Infrastructure.Persistence.Data.Repositories;
 
 namespace TodoListManagementSystem.Infrastructure.Persistence.DependencyInjection
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+        extension(IServiceCollection services)
         {
-            services.AddSingleton<IPathProvider, PathProvider>();
+            public IServiceCollection AddInfrastructureServices()
+            {
+                services.AddSingleton<IPathProvider, PathProvider>();
 
-            services.AddScoped<IJsonFileStore, JsonFileStore>();
+                services.AddScoped<IJsonFileStore, JsonFileStore>();
 
-            services.AddSingleton<IFileSystemInitializer, FileSystemInitializer>();
+                services.AddSingleton<IFileSystemInitializer, FileSystemInitializer>();
 
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ITodoListRepository, TodoListRepository>();
-            services.AddScoped<ITaskItemRepository, TaskItemRepository>();
+                services.AddScoped<IUserRepository, UserRepository>();
+                services.AddScoped<ITodoListRepository, TodoListRepository>();
+                services.AddScoped<ITaskItemRepository, TaskItemRepository>();
 
-            return services;
+                return services;
+            }
         }
     }
 }

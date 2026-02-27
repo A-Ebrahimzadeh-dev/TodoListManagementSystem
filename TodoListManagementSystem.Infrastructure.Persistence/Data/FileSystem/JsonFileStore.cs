@@ -12,7 +12,6 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             WriteIndented = true,
-            IncludeFields = true,
             PropertyNameCaseInsensitive = true
         };
 
@@ -102,6 +101,10 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem
             await fileLock.WaitAsync(cancellationToken);
             try
             {
+                var dir = Path.GetDirectoryName(filePath);
+                if (!string.IsNullOrWhiteSpace(dir))
+                    Directory.CreateDirectory(dir);
+
                 var tempFilePath = filePath + ".tmp";
 
                 await using (var stream = new FileStream(
@@ -149,6 +152,7 @@ namespace TodoListManagementSystem.Infrastructure.Persistence.Data.FileSystem
             string filePath,
             CancellationToken cancellationToken)
         {
+            //var r = Directory.Exists(filePath);
             return Task.FromResult(File.Exists(filePath));
         }
 

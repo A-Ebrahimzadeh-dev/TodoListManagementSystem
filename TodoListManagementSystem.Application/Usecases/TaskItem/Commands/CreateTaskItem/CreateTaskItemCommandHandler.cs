@@ -13,33 +13,27 @@ namespace TodoListManagementSystem.Application.Usecases.TaskItem.Commands.Create
         private readonly ITodoListRepository _todoListRepository = todoListRepository;
         private readonly ITaskItemRepository _taskItemRepository = taskItemRepository;
 
-        public async Task<TaskItemDto> Handle(CreateTaskItemCommand command, CancellationToken cancellationToken)
+        public async Task<TaskItemDto> Handle(CreateTaskItemCommand request, CancellationToken cancellationToken)
         {
-            await ValidateAccessAsync(command, cancellationToken);
+            var todoListExists = await _todoListRepository.ExistsAsync(request.UserId, request.TodoListId, cancellationToken);
+            if (!todoListExists)
+                throw new SourceNotFoundException($"Todo list with ID [{request.TodoListId}] not found for user [{request.UserId}].");
 
-            var existingTaskItem = await _taskItemRepository.ExistsAsync(command.Title, command.DueDate, cancellationToken);
-            if (existingTaskItem)
-                throw new SourceAlreadyExistsException($"Task item with title '{command.Title}' and due date '{command.DueDate:yyyy-MM-dd}' already exists.");
+            var taskItemExists = await _taskItemRepository.ExistsAsync(request.UserId, request.TodoListId, request.Title, request.DueDate, cancellationToken);
+            if (taskItemExists)
+                throw new SourceAlreadyExistsException($"Task item with title '{request.Title}' and due date '{request.DueDate:yyyy-MM-dd}' already exists.");
 
             var taskItem = Domain.Entities.TaskItem.CreateNewTaskItem(
-                command.TodoListId,
-                command.Title,
-                command.Description,
-                command.PriorityLevel,
-                command.DueDate,
-                command.Tags);
+                request.TodoListId,
+                request.Title,
+                request.Description,
+                request.PriorityLevel,
+                request.DueDate,
+                request.Tags);
 
-            var newTaskItem = await _taskItemRepository.SaveAsync(taskItem, cancellationToken);
+            await _taskItemRepository.SaveAsync(request.UserId, taskItem, cancellationToken);
 
-            return newTaskItem.MapToTaskItemDto();
-        }
-
-        private async Task ValidateAccessAsync(CreateTaskItemCommand command, CancellationToken ct)
-        {
-            var existingTodoList = await _todoListRepository.GetByIdAsync(command.TodoListId, ct)
-                ?? throw new SourceNotFoundException($"Todo list with ID [{command.TodoListId}] not found.");
-            if (existingTodoList.Creator != command.UserId)
-                throw new AccessDeniedException($"User [{command.UserId}] not have permission to create this task item.");
+            return taskItem.MapToTaskItemDto();
         }
     }
 }
